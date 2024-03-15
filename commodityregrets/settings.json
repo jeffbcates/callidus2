@@ -1,0 +1,108 @@
+{
+	/*our game is COMMODITY - a 1-player trading game with a single commodity (widget)*/
+	"game": "COMMODITY",
+
+	/*settings related to nash value of the game
+	*/
+
+	"nashGames": 100,
+
+	/*if trace is set to true, every single move made by the trainer is logged to a trace
+		file within the regrets game folder in human readable form
+
+		echoTrace:			if true, the trace output is printed to the console and the trainer and prompts between each trace
+		roundProgress:	if true, the round number is printed on the epoch progress bar
+		traceDepth:			the depth of iteration to write to the trace (if zero, all recursive iterations are traced)
+		tracePreState:	if true, the state before iteration recursion is traced
+		tracePostState: if true, the state after exiting iteration is traced
+	*/
+	"trace": true,
+	"traceDepth": 1,
+	"echoTrace": false,
+	"roundProgress": true,
+	"tracePreState": false,
+	"tracePostState": true,
+
+	/*when training, we may want to use a random number seed for testing, that way the same random sequence is used for training
+		if we do not want to use a seed, just set to zero, or comment out
+	*/
+	"randomSeed": 0,
+
+	/*argmax controls whether Callidus chooses the best action or a random weighted action from the best N actions
+		for very complex games, the use of argmax can speed up training
+	*/
+	"argmax": false,
+
+	/*when the reach probability of a particular strategy falls below this value, the trainer will no longer
+		train against this strategy - for very complex games, this may be necessary but simple games may not need it
+
+		when utilizeActiveStrategy is TRUE our utility at each iteration is determined by the current actual strategy
+		versus from the average strategy over time
+	*/
+	"strategythreshold": 0,
+	"utilizeActiveStrategy": false,
+
+	/*it is helpful in training to get a baseline strategy as a starting point, then to reset the strategy sums
+		so that the game will reconsider all techniques, but the utilities it starts with are the assumed best strategy
+		this setting controls after which epoch that reset happens -> zero for none
+	*/
+
+	"resetEvery": 0,
+	"resetAfter": 1,
+
+	/*when training, how many epochs do we run, or how many minutes do we run
+		you should either set epochs to a non-zero value, or minutes to a non-zero value.
+		when both are set, either can trigger an end to training -> (epochSteps is how many games played per epoch)		
+	*/
+	"epochs": 1000,
+	"epochSteps": 1000,
+
+	"minutes": 0,
+
+	/*all possible actions for the game and their default values (for commodity, we can buy, sell, or hold)*/
+	"actions": {
+		/*
+			"B10":{"min":1,"max":100, "valid":1, "static": 10, "name":"B10", "type": "B"},
+      "B20":{"min":1,"max":100, "valid":1, "static": 20, "name":"B20", "type": "B"},
+      "B40":{"min":1,"max":100, "valid":1, "static": 40, "name":"B40", "type": "B"},
+			*/
+		"B80": {"min": 1,"max": 100,"valid": 1,"static": 80,"name": "B80","type": "B"},
+
+		/*
+      "S10":{"min":1,"max":100, "valid":1, "static":  10, "name":"S10", "type": "S"},
+			"S20":{"min":1,"max":100, "valid":1, "static":  20, "name":"S20", "type": "S"},
+			"S40":{"min":1,"max":100, "valid":1, "static":  40, "name":"S40", "type": "S"},
+			*/
+
+		"S80": {"min": 1,"max": 100,"valid": 1,"static": 80,"name": "S80","type": "S"},
+
+		"H": {"min": 0,"max": 0,"valid": 1,"static": 0,"name": "H","type": "H"}
+	},
+
+	/***DEFINE OUR SYMMETRIC TREE SHAPE***/
+
+	"symmtree": [
+
+		/*general game state paths*/
+		[ "round", 20, 0, 1, "o" ],
+		[ "cash", 20, 0, 1, "t" ],
+		[ "shares", 20, 0, 600, "t" ],
+		[ "utility", 20, 0, 600, "t" ],
+
+		/*the abstracted historic low, historic high, and current price*/
+		[ "low", 20, 0, 600, "t" ],
+		[ "high", 20, 0, 600, "t" ],
+		[ "price", 20, 0, 600, "t" ],
+
+		/*our historic price movement*/
+		[ "history", 20, 0, 200, "tt" ],
+
+		/*all games require infoset shape, but the sizes depend on the game*/
+		[ "infoset", 3, 0, 200, "tt" ],
+		[ "regrets", 3, 1, 200, "tt" ], //the 3 here needs to match the # of actions in the game
+		[ "strategy", 3, 1, 200, "tt" ], //the 3 here needs to match the # of actions in the game
+		[ "stats", 2, 0, 200, "tt" ]
+
+	]
+
+}

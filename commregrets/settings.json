@@ -1,0 +1,124 @@
+{
+	/*our game is COMMODITY - a 1-player trading game with a single commodity (widget)*/
+	"game": "COMMODITY",
+
+
+	/*settings related to if we load the regrets into memory, or open on disk*/
+	"namespace":  "commregrets",
+	"ondisk":  false,
+
+	/*settings related to nash value of the game
+	*/
+
+	"nashGames": 100,
+
+	/*if trace is set to true, every single move made by the trainer is logged to a trace
+		file within the regrets game folder in human readable form
+
+		echoTrace:			if true, the trace output is printed to the console and the trainer and prompts between each trace
+		roundProgress:	if true, the round number is printed on the epoch progress bar
+		traceDepth:			the depth of iteration to write to the trace (if zero, all recursive iterations are traced)
+		tracePreState:	if true, the state before iteration recursion is traced
+		tracePostState: if true, the state after exiting iteration is traced
+		traceCore:			for some games, you can't trace on every core, that makes the trace files messy, if this is set to a non-zero
+										number that is the core that traces (technically the cores are 0 based, but we shift this number so its 1 based)
+	*/
+	"trace": false,
+	"traceDepth": 0,
+	"traceCore": 0,
+
+	/*when training, we may want to use a random number seed for testing, that way the same random sequence is used for training
+		if we do not want to use a seed, just set to zero, or comment out
+	*/
+	"randomSeed": 0,
+
+	/*argmax controls whether Callidus chooses the best action or a random weighted action from the best N actions
+		for very complex games, the use of argmax can speed up training
+	*/
+	"argmax": false,
+
+	/*when the reach probability of a particular strategy falls below this value, the trainer will no longer
+		train against this strategy - for very complex games, this may be necessary but simple games may not need it
+
+		when utilizeActiveStrategy is TRUE our utility at each iteration is determined by the current actual strategy
+		versus from the average strategy over time
+	*/
+	"strategythreshold": 0.05,
+	"utilizeActiveStrategy": false,
+
+	/*it is helpful in training to get a baseline strategy as a starting point, then to reset the strategy sums
+		so that the game will reconsider all techniques, but the utilities it starts with are the assumed best strategy
+		this setting controls after which epoch that reset happens -> zero for none
+	*/
+
+	"resetEvery": 0,
+	"resetAfter": 1,
+
+	/*when training, how many epochs do we run, or how many minutes do we run
+		you should either set epochs to a non-zero value, or minutes to a non-zero value.
+		when both are set, either can trigger an end to training -> (epochSteps is how many games played per epoch)		
+	*/
+	"epochs": 100,
+	"epochSteps": 100,
+	"cores": 4,
+	"minutes": 0,
+
+	/*all possible actions for the game and their default values (for commodity, we can buy, sell, or hold)*/
+	"actions": {
+		"BALL": {	"name": "BALL","valid": 1,"static": 0,"type": "B", "all":true, "symbols": ["SOXL","SOXS"]},
+		"BOL": {	"name": "BOL","valid": 1,"static": 0,"type": "B", "all":true, "symbols": ["SOXL"]},
+		"BOS": {	"name": "BOS","valid": 1,"static": 0,"type": "B", "all":true, "symbols": ["SOXS"]},
+		"SALL": {"name": "SALL","valid": 1,"static": 0, "type": "S", "all": true, "symbols": ["SOXL","SOXS"]},
+		"H": {"min": 0,"max": 0,"valid": 1,"static": 0,"name": "H","type": "H", "all": true,"symbols": ["SOXL"]}
+	},
+
+	/***DEFINE OUR SYMMETRIC TREE SHAPE***/
+
+	"pathgenerator":  "gen_regret_path_multisymbol",
+	"pathunpacker":  "unpack_regret_path_supersimplified",
+	"symmtree": [
+
+		/*general game state paths*/
+		[ "lastround", 2, 0, 1, "o" ], //quartile steps (25%, 50%, 75%, lastround)
+		[ "step", 5, 0, 20, "o" ], //quartile steps (25%, 50%, 75%, lastround)
+		[ "profitable", 3, 0, 3, "t" ],
+		[ "profit", 20, 0, 6, "t" ],
+		[ "wave1", 2, 0, 10, "t" ],
+		[ "wave3", 2, 0, 10, "t" ],
+		[ "wave6", 2, 0, 10, "t" ],
+		[ "wave12", 2, 0, 10, "t" ],
+		[ "wave24", 2, 0, 10, "t" ],
+		[ "wave48", 2, 0, 10, "t" ],
+		[ "vol0", 20, 0, 100, "t" ],
+		[ "vol1", 20, 0, 100, "t" ],
+		[ "vol3", 20, 0, 100, "t" ],
+		[ "vol6", 20, 0, 100, "t" ],
+		[ "vol12", 20, 0, 100, "t" ],
+		[ "vol24", 20, 0, 100, "t" ],
+		[ "vol48", 20, 0, 100, "t" ],
+
+		/*all games require infoset shape, but the sizes depend on the game*/
+		[ "infoset", 3, 0, 100, "t" ],
+		[ "regrets", 5, 1, 100, "t" ], //the # after the name here needs to match the # of actions in the game
+		[ "strategy", 5, 1, 100, "t" ], //the # after the name here needs to match the # of actions in the game
+		[ "stats", 2, 0, 100, "t" ]
+
+	],
+	"symmtree_simplified": [
+
+			/*general game state paths*/
+			[ "round", 20, 0, 1, "o" ],
+			[ "step", 5, 0, 20, "o" ],
+			[ "cash", 20, 0, 300, "ht" ],
+			[ "shares", 20, 0, 300, "ht" ],
+			[ "profit", 20, 0, 600, "ht"],
+
+			/*all games require infoset shape, but the sizes depend on the game*/
+			[ "infoset", 3, 0, 200, "ht"],
+			[ "regrets", 5, 1, 200, "ht"],		//the 5 here needs to match the # of actions in the game
+			[ "strategy", 5, 1, 200, "ht"],	//the 5 here needs to match the # of actions in the game
+			[ "stats", 2, 0, 200, "ht"]
+
+	]
+
+}

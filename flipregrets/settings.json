@@ -1,0 +1,60 @@
+{
+	/*our game is FLIP - a simplified 2-player poker game*/
+	"game": "FLIP",
+
+	/*settings related to nash value of the game
+	*/
+
+	"nashGames": 100,
+
+	/*if trace is set to true, every single move made by the trainer is logged to a trace
+		file within the regrets game folder in human readable form
+
+		if echotrace is also true, the trace output is printed to the console and the trainer and prompts between each trace
+
+		if profile is true, a python profile is generated against the training
+	*/
+	"trace": false,
+	"echotrace": false,
+	"profile": false,
+
+	/*when training, we may want to use a random number seed for testing, that way the same random sequence is used for training
+		if we do not want to use a seed, just set to zero, or comment out
+	*/
+	"randomSeed": 10,
+
+	/*argmax controls whether Callidus chooses the best action or a random weighted action from the best N actions
+		for very complex games, the use of argmax can speed up training
+	*/
+	"argmax": false,
+
+	/*when the reach probability of a particular strategy falls below this value, the trainer will no longer
+		train against this strategy - for very complex games, this may be necessary but simple games may not need it
+	*/
+	"strategythreshold": 0,
+
+	/*it is helpful in training to get a baseline strategy as a starting point, then to reset the strategy sums
+		so that the game will reconsider all techniques, but the utilities it starts with are the assumed best strategy
+		this setting controls after which epoch that reset happens -> zero for none
+	*/
+
+	"resetEvery": 0,
+	"resetAfter": 2,
+
+	/*when training, how many epochs do we run, or how many minutes do we run
+		you should either set epochs to a non-zero value, or minutes to a non-zero value.
+		when both are set, either can trigger an end to training -> (epochSteps is how many games played per epoch)		
+	*/
+	"epochs": 10,
+	"epochSteps": 10000,
+	"cores": 2,
+	"minutes": 0,
+
+	/*all possible actions for the game and their default values*/
+
+	"actions": {
+      "H":{"min":1,"max":1, "valid":1, "static":1, "name":"H"},
+      "T":{"min":1,"max":1, "valid":1, "static":0, "name":"T"},
+	}
+
+}
